@@ -25,6 +25,10 @@ if (DB_CLIENT === 'sqlite3') {
     user: process.env.DB_USER || 'root',
     database: process.env.DB_NAME || 'test'
   }
+
+  if (process.env.DB_PASS) {
+    connection.password = process.env.DB_PASS
+  }
 }
 
 JSDataAdapterTests.init({
