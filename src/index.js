@@ -421,6 +421,13 @@ function loadWithRelations (items, resourceConfig, options) {
 Adapter.extend({
   constructor: SqlAdapter,
 
+  _returning (idAttribute) {
+    // Some knex client drivers do not support .returning(), so set the
+    // attribute to null to prevent knex from emitting warnings.
+
+    return ['mysql', 'sqlite3'].includes(this.knexOpts.client) ? null : idAttribute
+  },
+
   _count (mapper, query, opts) {
     opts || (opts = {})
     query || (query = {})
@@ -438,7 +445,7 @@ Adapter.extend({
 
     const sqlBuilder = utils.isUndefined(opts.transaction) ? this.knex : opts.transaction
     return sqlBuilder(getTable(mapper))
-      .insert(props, idAttribute)
+      .insert(props, this._returning(idAttribute))
       .then((ids) => {
         const id = utils.isUndefined(props[idAttribute]) ? (ids.length ? ids[0] : undefined) : props[idAttribute]
         if (utils.isUndefined(id)) {
